@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { OfficialTopBar } from './components/OfficialTopBar';
 import { LoginForm } from './components/LoginForm';
 import { CitizenPortal } from './components/CitizenPortal';
 import { WelcomePage } from './components/WelcomePage';
@@ -12,15 +11,21 @@ import { ForgotPasswordModal } from './components/ForgotPasswordModal';
 import { AuthenticationSuccessModal } from './components/AuthenticationSuccessModal';
 import { DemoAccountsDrawer } from './components/DemoAccountsDrawer';
 import { UserProfile, DemoAccount, PortalType, CitizenProfile } from './types/auth';
-import { ShieldCheck, Lock, FileCheck2, Scale, Users, ShieldAlert, Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Users, ShieldCheck, ArrowLeft, Sun, Moon, ArrowRight, Key } from 'lucide-react';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 
-export default function App() {
-  // Welcoming Page is the default landing screen as requested by user
+function AppContent() {
+  const { theme, toggleTheme, isDark } = useTheme();
+
+  // Welcoming Page is default landing
   const [viewMode, setViewMode] = useState<'welcome' | 'portal'>('welcome');
 
-  // Focus on the citizen ("the people") side by default when entering portal
+  // Active portal: 'citizen' or 'official'
   const [activePortal, setActivePortal] = useState<PortalType>('citizen');
   
+  // Specific notification if navigated from a welcome capability card
+  const [targetRoleNotice, setTargetRoleNotice] = useState<string | null>(null);
+
   // Police Official Session State
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState<UserProfile | null>(null);
   const [selectedDemoAccount, setSelectedDemoAccount] = useState<DemoAccount | null>(null);
@@ -34,22 +39,27 @@ export default function App() {
 
   const handleOfficerLoginSuccess = (user: UserProfile) => {
     setAuthenticatedOfficer(user);
+    setTargetRoleNotice(null);
   };
 
   const handleCitizenLoginSuccess = (citizen: CitizenProfile) => {
     setAuthenticatedCitizen(citizen);
+    setTargetRoleNotice(null);
   };
 
   const handleSignOutOfficer = () => {
     setAuthenticatedOfficer(null);
     setViewMode('welcome');
+    setTargetRoleNotice(null);
   };
 
   const handleSignOutCitizen = () => {
     setAuthenticatedCitizen(null);
     setViewMode('welcome');
+    setTargetRoleNotice(null);
   };
 
+  // Direct quick demo logins for testing
   const handleDirectDemoCitizenLogin = () => {
     const demoCitizen: CitizenProfile = {
       id: 'ctz_thandi_01',
@@ -141,7 +151,26 @@ export default function App() {
     setSelectedDemoAccount(account);
   };
 
-  // If citizen is authenticated, render the complete Complainant/User Dashboard
+  // When user clicks one of the 4 capability buttons on the welcoming page:
+  // "then if user clicks them they have to login first then be able to do what they wanna do"
+  const handleActionRequiresLogin = (target: 'citizen' | 'officer' | 'detective' | 'commander') => {
+    if (target === 'citizen') {
+      setActivePortal('citizen');
+      setTargetRoleNotice('Please sign in as a citizen to lodge and track your case dockets.');
+    } else if (target === 'officer') {
+      setActivePortal('official');
+      setTargetRoleNotice('Please sign in as a Police Officer (CSC) to capture and manage case dockets.');
+    } else if (target === 'detective') {
+      setActivePortal('official');
+      setTargetRoleNotice('Please sign in as a Detective to investigate dockets and update evidence.');
+    } else if (target === 'commander') {
+      setActivePortal('official');
+      setTargetRoleNotice('Please sign in as a Commander or Administrator to inspect and oversee dockets.');
+    }
+    setViewMode('portal');
+  };
+
+  // If citizen is authenticated, render the complete Complainant Dashboard
   if (authenticatedCitizen) {
     return (
       <ComplainantDashboard
@@ -152,7 +181,7 @@ export default function App() {
     );
   }
 
-  // If station commander / supervisory officer is authenticated, render the Station Commander Portal
+  // If station commander is authenticated, render Station Commander Portal
   if (authenticatedOfficer && authenticatedOfficer.role === 'COMMANDER') {
     return (
       <CommanderPage
@@ -162,7 +191,7 @@ export default function App() {
     );
   }
 
-  // If detective / investigating officer is authenticated, render the standalone Detective Page
+  // If detective is authenticated, render Detective Page
   if (authenticatedOfficer && authenticatedOfficer.role === 'DETECTIVE') {
     return (
       <DetectivePage
@@ -172,7 +201,7 @@ export default function App() {
     );
   }
 
-  // If police officer / CSC officer is authenticated, render the dedicated Police Officer Page
+  // If police officer / CSC officer is authenticated, render Police Officer Page
   if (authenticatedOfficer && authenticatedOfficer.role === 'CSC_OFFICER') {
     return (
       <OfficerPage
@@ -182,7 +211,7 @@ export default function App() {
     );
   }
 
-  // If system administrator is authenticated as staff, render the dedicated System Administrator Page
+  // If system administrator is authenticated, render System Administrator Page
   if (authenticatedOfficer && authenticatedOfficer.role === 'ADMINISTRATOR') {
     return (
       <AdminPage
@@ -195,315 +224,269 @@ export default function App() {
   // Welcoming Page (Default Landing Screen)
   if (viewMode === 'welcome') {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white relative overflow-x-hidden">
-        {/* Top Official Status Bar */}
-        <div className="relative z-10">
-          <OfficialTopBar />
-        </div>
-
-        {/* Full Interactive Welcoming Experience */}
+      <>
         <WelcomePage
           onSignInCitizen={() => {
             setActivePortal('citizen');
+            setTargetRoleNotice(null);
             setViewMode('portal');
           }}
           onSignInOfficial={() => {
             setActivePortal('official');
+            setTargetRoleNotice(null);
             setViewMode('portal');
           }}
-          onQuickDemoCitizen={handleDirectDemoCitizenLogin}
-          onQuickDemoCommander={handleDirectDemoCommanderLogin}
-          onQuickDemoDetective={handleDirectDemoDetectiveLogin}
-          onQuickDemoOfficer={handleDirectDemoOfficerLogin}
-          onQuickDemoAdmin={handleDirectDemoAdminLogin}
+          onActionRequiresLogin={handleActionRequiresLogin}
         />
 
-        {/* Forgot Password Modal */}
         <ForgotPasswordModal
           isOpen={isForgotPasswordOpen}
           onClose={() => setIsForgotPasswordOpen(false)}
           initialIdentifier={forgotPasswordIdentifier}
         />
-      </div>
+      </>
     );
   }
 
+  // Portal Mode (Sign In / Registration Screen)
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white relative overflow-x-hidden">
-      {/* Background Decorative Police Matrix & Security Gradients */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] bg-blue-900/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 w-[600px] h-[300px] bg-slate-900/40 rounded-full blur-2xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
-      </div>
+    <div className={`min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white ${
+      isDark ? 'bg-black text-white' : 'bg-white text-black'
+    }`}>
+      
+      {/* Top Navigation Bar - Separated by a clean line side by side */}
+      <header className={`w-full border-b py-3 px-4 sm:px-8 flex items-center justify-between ${
+        isDark ? 'border-white/10' : 'border-black/10'
+      }`}>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setViewMode('welcome')}
+            className={`inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-md border transition-colors cursor-pointer ${
+              isDark 
+                ? 'border-white/20 text-white hover:bg-slate-900' 
+                : 'border-black/20 text-black hover:bg-slate-100'
+            }`}
+          >
+            <ArrowLeft size={14} className="text-blue-600" />
+            <span>Back to Welcoming Page</span>
+          </button>
+        </div>
 
-      {/* Top Official Status Bar */}
-      <div className="relative z-10">
-        <OfficialTopBar />
-      </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-blue-600 font-mono hidden sm:inline">
+            SFEN POLICE DOCKET SYSTEM
+          </span>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label="Toggle dark/light theme"
+            className={`p-1.5 rounded-md border text-xs flex items-center gap-1.5 transition-colors cursor-pointer ${
+              isDark 
+                ? 'border-white/20 text-white hover:bg-slate-900' 
+                : 'border-black/20 text-black hover:bg-slate-100'
+            }`}
+          >
+            {isDark ? <Sun size={15} className="text-blue-500" /> : <Moon size={15} className="text-blue-600" />}
+            <span className="hidden md:inline font-mono">{isDark ? 'Light' : 'Dark'}</span>
+          </button>
+        </div>
+      </header>
 
       {/* Main Container */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-6 sm:py-10">
-        <div className="w-full max-w-5xl mx-auto flex flex-col items-center">
-          
-          {/* Back to Welcoming Page Navigation Bar */}
-          <div className="w-full max-w-xl mx-auto mb-4 flex items-center justify-between px-1">
-            <button
-              type="button"
-              id="btn-back-to-welcome"
-              onClick={() => setViewMode('welcome')}
-              className="inline-flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white px-3.5 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 transition-all cursor-pointer shadow-md group"
-            >
-              <ArrowLeft size={14} className="text-emerald-400 group-hover:-translate-x-0.5 transition-transform" />
-              <span>← Back to Welcoming Page</span>
-            </button>
-            <span className="text-[11px] text-slate-400 font-mono hidden sm:inline bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-800">
-              SAPS Official E-Policing Terminal
-            </span>
-          </div>
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-5xl mx-auto w-full">
+        
+        {/* Main Portal Switcher - Flat tabs separated by a line going side by side */}
+        <div className={`w-full max-w-md mx-auto mb-6 flex border-b ${
+          isDark ? 'border-white/15' : 'border-black/15'
+        }`}>
+          <button
+            type="button"
+            id="portal-tab-citizen"
+            onClick={() => {
+              setActivePortal('citizen');
+              setAuthenticatedOfficer(null);
+            }}
+            className={`flex-1 py-2.5 px-3 font-bold text-xs sm:text-sm border-b-2 transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+              activePortal === 'citizen'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Users size={16} />
+            <span>Citizen Portal</span>
+          </button>
 
-          {/* Main Portal Switcher: The People (Citizen) vs Police Officials */}
-          <div className="w-full max-w-md mx-auto mb-6">
-            <div className="p-1 rounded-2xl bg-slate-900/95 border border-slate-800 shadow-xl flex items-center gap-1 backdrop-blur-md">
-              <button
-                type="button"
-                id="portal-tab-citizen"
-                onClick={() => {
-                  setActivePortal('citizen');
-                  setAuthenticatedOfficer(null);
-                }}
-                className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  activePortal === 'citizen'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                }`}
-              >
-                <Users size={16} />
-                <span>Citizen / Public Portal</span>
-              </button>
-
-              <button
-                type="button"
-                id="portal-tab-officials"
-                onClick={() => {
-                  setActivePortal('official');
-                  setAuthenticatedCitizen(null);
-                }}
-                className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                  activePortal === 'official'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                }`}
-              >
-                <ShieldAlert size={16} />
-                <span>Police Officials</span>
-              </button>
-            </div>
-          </div>
-
-          {/* CITIZEN PORTAL */}
-          {activePortal === 'citizen' && (
-            <div className="w-full flex flex-col items-center">
-              <CitizenPortal
-                onSuccess={handleCitizenLoginSuccess}
-                onForgotPassword={handleOpenForgotPassword}
-              />
-
-              {/* Quick Demo Access banner to test the Complainant Dashboard immediately */}
-              <div className="mt-4 w-full max-w-lg">
-                <button
-                  type="button"
-                  id="btn-quick-demo-complainant"
-                  onClick={handleDirectDemoCitizenLogin}
-                  className="w-full py-2 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 border border-emerald-500/30 hover:border-emerald-500/60 text-emerald-300 text-xs font-semibold transition-all flex items-center justify-between cursor-pointer group shadow-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={14} className="text-emerald-400 group-hover:rotate-12 transition-transform" />
-                    <span>Quick Demo: Instant Access as Complainant <strong>(Thandi Molefe)</strong></span>
-                  </div>
-                  <div className="flex items-center gap-1 text-[11px] text-emerald-400">
-                    <span>Enter Dashboard</span>
-                    <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                </button>
-              </div>
-
-                  {/* Citizen Public Services Badges */}
-                  <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl px-2">
-                    <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/80 text-center flex flex-col items-center gap-1.5">
-                      <FileCheck2 size={16} className="text-emerald-400" />
-                      <span className="text-[11px] font-semibold text-slate-300">Docket Status</span>
-                      <span className="text-[10px] text-slate-500">Real-Time Alerts</span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/80 text-center flex flex-col items-center gap-1.5">
-                      <ShieldCheck size={16} className="text-emerald-400" />
-                      <span className="text-[11px] font-semibold text-slate-300">Evidence Portal</span>
-                      <span className="text-[10px] text-slate-500">Secure Statements</span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/80 text-center flex flex-col items-center gap-1.5">
-                      <Scale size={16} className="text-emerald-400" />
-                      <span className="text-[11px] font-semibold text-slate-300">Court Updates</span>
-                      <span className="text-[10px] text-slate-500">Hearing Schedules</span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/80 text-center flex flex-col items-center gap-1.5">
-                      <Lock size={16} className="text-emerald-400" />
-                      <span className="text-[11px] font-semibold text-slate-300">Dual Verified</span>
-                      <span className="text-[10px] text-slate-500">Email & Mobile</span>
-                    </div>
-                  </div>
-            </div>
-          )}
-
-          {/* POLICE OFFICIALS PORTAL */}
-          {activePortal === 'official' && (
-            <div className="w-full flex flex-col items-center">
-              {authenticatedOfficer ? (
-                <AuthenticationSuccessModal
-                  user={authenticatedOfficer}
-                  onSignOut={handleSignOutOfficer}
-                />
-              ) : (
-                <div className="w-full flex flex-col items-center">
-                  <LoginForm
-                    onSuccess={handleOfficerLoginSuccess}
-                    onForgotPassword={handleOpenForgotPassword}
-                    prefillAccount={selectedDemoAccount}
-                  />
-
-                  {/* Quick Demo Access for Commander, Detective, Police Officer & System Administrator */}
-                  <div className="mt-4 w-full max-w-lg space-y-2">
-                    <button
-                      type="button"
-                      id="btn-quick-demo-commander"
-                      onClick={handleDirectDemoCommanderLogin}
-                      className="w-full py-2 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 border border-emerald-500/30 hover:border-emerald-500/60 text-emerald-300 text-xs font-semibold transition-all flex items-center justify-between cursor-pointer group shadow-sm"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Sparkles size={14} className="text-emerald-400 group-hover:rotate-12 transition-transform" />
-                        <span>Quick Demo: Instant Access as Station Commander <strong>(Snr. Supt. Elena Vance)</strong></span>
-                      </div>
-                      <div className="flex items-center gap-1 text-[11px] text-emerald-400">
-                        <span>Enter Commander Portal</span>
-                        <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      id="btn-quick-demo-detective"
-                      onClick={handleDirectDemoDetectiveLogin}
-                      className="w-full py-2 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 border border-amber-500/30 hover:border-amber-500/60 text-amber-300 text-xs font-semibold transition-all flex items-center justify-between cursor-pointer group shadow-sm"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Sparkles size={14} className="text-amber-400 group-hover:rotate-12 transition-transform" />
-                        <span>Quick Demo: Instant Access as Detective <strong>(Det. Insp. David Khumalo)</strong></span>
-                      </div>
-                      <div className="flex items-center gap-1 text-[11px] text-amber-400">
-                        <span>Enter Detective Portal</span>
-                        <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      id="btn-quick-demo-officer"
-                      onClick={handleDirectDemoOfficerLogin}
-                      className="w-full py-2 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 border border-blue-500/30 hover:border-blue-500/60 text-blue-300 text-xs font-semibold transition-all flex items-center justify-between cursor-pointer group shadow-sm"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Sparkles size={14} className="text-blue-400 group-hover:rotate-12 transition-transform" />
-                        <span>Quick Demo: Instant Access as Police Officer <strong>(Constable Sarah Ndlovu)</strong></span>
-                      </div>
-                      <div className="flex items-center gap-1 text-[11px] text-blue-400">
-                        <span>Enter Officer Portal</span>
-                        <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      id="btn-quick-demo-admin"
-                      onClick={handleDirectDemoAdminLogin}
-                      className="w-full py-2 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 border border-purple-500/30 hover:border-purple-500/60 text-purple-300 text-xs font-semibold transition-all flex items-center justify-between cursor-pointer group shadow-sm"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Sparkles size={14} className="text-purple-400 group-hover:rotate-12 transition-transform" />
-                        <span>Quick Demo: Instant Access as System Administrator <strong>(Marcus Cole)</strong></span>
-                      </div>
-                      <div className="flex items-center gap-1 text-[11px] text-purple-400">
-                        <span>Enter Admin Page</span>
-                        <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-                      </div>
-                    </button>
-                  </div>
-
-                  <DemoAccountsDrawer onSelectAccount={handleSelectDemoAccount} />
-
-                  <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl px-2">
-                    <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/80 text-center flex flex-col items-center gap-1.5">
-                      <ShieldCheck size={16} className="text-blue-400" />
-                      <span className="text-[11px] font-semibold text-slate-300">Evidence Chain</span>
-                      <span className="text-[10px] text-slate-500">Tamper-Evident</span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/80 text-center flex flex-col items-center gap-1.5">
-                      <FileCheck2 size={16} className="text-blue-400" />
-                      <span className="text-[11px] font-semibold text-slate-300">Digital Dockets</span>
-                      <span className="text-[10px] text-slate-500">End-to-End Tracking</span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/80 text-center flex flex-col items-center gap-1.5">
-                      <Scale size={16} className="text-blue-400" />
-                      <span className="text-[11px] font-semibold text-slate-300">Court Ready</span>
-                      <span className="text-[10px] text-slate-500">Judicial Compliance</span>
-                    </div>
-                    <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/80 text-center flex flex-col items-center gap-1.5">
-                      <Lock size={16} className="text-blue-400" />
-                      <span className="text-[11px] font-semibold text-slate-300">RBAC Security</span>
-                      <span className="text-[10px] text-slate-500">Automated Clearance</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
+          <button
+            type="button"
+            id="portal-tab-officials"
+            onClick={() => {
+              setActivePortal('official');
+              setAuthenticatedCitizen(null);
+            }}
+            className={`flex-1 py-2.5 px-3 font-bold text-xs sm:text-sm border-b-2 transition-colors flex items-center justify-center gap-2 cursor-pointer ${
+              activePortal === 'official'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <ShieldCheck size={16} />
+            <span>Police Officials</span>
+          </button>
         </div>
+
+        {/* CITIZEN PORTAL */}
+        {activePortal === 'citizen' && (
+          <div className="w-full flex flex-col items-center">
+            <CitizenPortal
+              onSuccess={handleCitizenLoginSuccess}
+              onForgotPassword={handleOpenForgotPassword}
+              targetRoleNotice={targetRoleNotice}
+            />
+
+            {/* Quick Demo Access for Complainant */}
+            <div className="mt-4 w-full max-w-md">
+              <button
+                type="button"
+                id="btn-quick-demo-complainant"
+                onClick={handleDirectDemoCitizenLogin}
+                className={`w-full py-2.5 px-3 rounded-md border text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${
+                  isDark 
+                    ? 'border-blue-600/40 hover:border-blue-600 bg-black text-blue-400' 
+                    : 'border-blue-600/40 hover:border-blue-600 bg-white text-blue-700'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Key size={14} className="text-blue-600" />
+                  <span>Instant Test Login: Complainant (Thandi Molefe)</span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-blue-600 font-bold">
+                  <span>Enter</span>
+                  <ArrowRight size={13} />
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* POLICE OFFICIALS PORTAL */}
+        {activePortal === 'official' && (
+          <div className="w-full flex flex-col items-center">
+            {authenticatedOfficer ? (
+              <AuthenticationSuccessModal
+                user={authenticatedOfficer}
+                onSignOut={handleSignOutOfficer}
+              />
+            ) : (
+              <div className="w-full flex flex-col items-center">
+                <LoginForm
+                  onSuccess={handleOfficerLoginSuccess}
+                  onForgotPassword={handleOpenForgotPassword}
+                  prefillAccount={selectedDemoAccount}
+                  targetRoleNotice={targetRoleNotice}
+                />
+
+                {/* Direct Role Test Buttons */}
+                <div className="mt-4 w-full max-w-md space-y-2">
+                  <button
+                    type="button"
+                    id="btn-quick-demo-commander"
+                    onClick={handleDirectDemoCommanderLogin}
+                    className={`w-full py-2 px-3 rounded-md border text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${
+                      isDark 
+                        ? 'border-white/10 hover:border-blue-600 bg-black text-slate-300' 
+                        : 'border-black/10 hover:border-blue-600 bg-white text-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Key size={13} className="text-blue-600" />
+                      <span>Station Commander (Snr. Supt. Elena Vance)</span>
+                    </div>
+                    <ArrowRight size={13} className="text-blue-600" />
+                  </button>
+
+                  <button
+                    type="button"
+                    id="btn-quick-demo-detective"
+                    onClick={handleDirectDemoDetectiveLogin}
+                    className={`w-full py-2 px-3 rounded-md border text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${
+                      isDark 
+                        ? 'border-white/10 hover:border-blue-600 bg-black text-slate-300' 
+                        : 'border-black/10 hover:border-blue-600 bg-white text-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Key size={13} className="text-blue-600" />
+                      <span>Detective Inspector (David Khumalo)</span>
+                    </div>
+                    <ArrowRight size={13} className="text-blue-600" />
+                  </button>
+
+                  <button
+                    type="button"
+                    id="btn-quick-demo-officer"
+                    onClick={handleDirectDemoOfficerLogin}
+                    className={`w-full py-2 px-3 rounded-md border text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${
+                      isDark 
+                        ? 'border-white/10 hover:border-blue-600 bg-black text-slate-300' 
+                        : 'border-black/10 hover:border-blue-600 bg-white text-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Key size={13} className="text-blue-600" />
+                      <span>Police Officer (Constable Sarah Ndlovu)</span>
+                    </div>
+                    <ArrowRight size={13} className="text-blue-600" />
+                  </button>
+
+                  <button
+                    type="button"
+                    id="btn-quick-demo-admin"
+                    onClick={handleDirectDemoAdminLogin}
+                    className={`w-full py-2 px-3 rounded-md border text-xs font-semibold transition-colors flex items-center justify-between cursor-pointer ${
+                      isDark 
+                        ? 'border-white/10 hover:border-blue-600 bg-black text-slate-300' 
+                        : 'border-black/10 hover:border-blue-600 bg-white text-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Key size={13} className="text-blue-600" />
+                      <span>System Administrator (Marcus Cole)</span>
+                    </div>
+                    <ArrowRight size={13} className="text-blue-600" />
+                  </button>
+                </div>
+
+                <div className="mt-4 w-full max-w-md">
+                  <DemoAccountsDrawer onSelectAccount={handleSelectDemoAccount} />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
       </main>
 
-      {/* Forgot Password Modal */}
       <ForgotPasswordModal
         isOpen={isForgotPasswordOpen}
         onClose={() => setIsForgotPasswordOpen(false)}
         initialIdentifier={forgotPasswordIdentifier}
       />
 
-      {/* Official Legal & Compliance Footer */}
-      <footer id="sfen-official-footer" className="relative z-10 w-full border-t border-slate-800/80 bg-slate-950/90 py-5 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left text-xs text-slate-500">
-          <div className="space-y-1">
-            <p className="font-medium text-slate-400">
-              National Police Service • Docket & Evidence Administration
-            </p>
-            <p className="text-[11px] text-slate-500 max-w-2xl leading-relaxed">
-              CONFIDENTIAL LAW ENFORCEMENT REPOSITORY. Unauthorised access, extraction, tampering, or dissemination of police case dockets is strictly prohibited under the Criminal Procedure Act, National Evidence Directives, and Cybercrimes Act. All interactions are monitored and cryptographically sealed.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4 text-[11px] text-slate-400 shrink-0">
-            <span className="text-slate-400">
-              System Ver. 2.4.0
-            </span>
-            <span>•</span>
-            <span className="hover:text-slate-300 transition-colors cursor-pointer" onClick={() => handleOpenForgotPassword('')}>
-              Public Help Desk
-            </span>
-            <span>•</span>
-            <span className="text-slate-400">
-              Chain of Custody Compliant
-            </span>
-          </div>
-        </div>
+      {/* Official Legal Footer */}
+      <footer className={`w-full border-t py-4 px-6 text-center text-xs ${
+        isDark ? 'border-white/10 text-slate-500' : 'border-black/10 text-slate-500'
+      }`}>
+        <p>National Police Service - Docket and Evidence Administration - Ver. 2.4</p>
       </footer>
     </div>
   );
 }
 
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}

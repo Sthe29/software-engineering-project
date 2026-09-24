@@ -611,7 +611,7 @@ export const CombinedRecordsView: React.FC<CombinedRecordsViewProps> = ({
                         event.completed 
                           ? 'bg-blue-500 text-white' 
                           : event.current 
-                          ? 'bg-blue-400/20 text-blue-400 border border-blue-400 animate-pulse'
+                          ? 'bg-blue-400/20 text-blue-400 border border-blue-400 '
                           : 'bg-slate-800 text-slate-500'
                       }`}>
                         {event.completed ? '✓' : idx + 1}

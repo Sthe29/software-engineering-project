@@ -74,7 +74,7 @@ export const CommanderSidebar: React.FC<CommanderSidebarProps> = ({
             {detectivesCount}
           </span>
           {pendingComplaintsCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white font-bold animate-pulse">
+            <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white font-bold ">
               {pendingComplaintsCount}
             </span>
           )}

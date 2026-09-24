@@ -69,13 +69,13 @@ export const StationVerificationPassModal: React.FC<StationVerificationPassModal
         <div className="p-5 sm:p-6 space-y-5 max-h-[75vh] overflow-y-auto">
           
           {/* Main Reference Hero Card */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-blue-500/30 text-center space-y-3 relative overflow-hidden shadow-inner">
-            <div className="flex items-center justify-between text-[11px] text-slate-400 pb-2 border-b border-slate-800/80">
+          <div className="p-5 rounded-md bg-black border border-blue-600 text-center space-y-3 relative overflow-hidden">
+            <div className="flex items-center justify-between text-[11px] text-slate-400 pb-2 border-b border-white/10">
               <span className="font-semibold uppercase tracking-wider">Online Report Reference</span>
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+              <span className={`px-2 py-0.5 rounded-sm text-[10px] font-bold ${
                 isCaseRegistered 
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
-                  : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-black text-blue-400 border border-blue-600'
               }`}>
                 {isCaseRegistered ? 'Official CAS Assigned' : 'Awaiting Station Visit'}
               </span>

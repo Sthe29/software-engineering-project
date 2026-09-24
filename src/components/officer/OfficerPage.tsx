@@ -10,6 +10,7 @@ import { OfficerCasesAndReportsView } from './OfficerCasesAndReportsView';
 import { OfficerDetectiveBranchView } from './OfficerDetectiveBranchView';
 import { OfficerDocketMovementView } from './OfficerDocketMovementView';
 import { OfficerProfileView } from './OfficerProfileView';
+import { useTheme } from '../../context/ThemeContext';
 
 interface OfficerPageProps {
   user: UserProfile;
@@ -17,6 +18,7 @@ interface OfficerPageProps {
 }
 
 export const OfficerPage: React.FC<OfficerPageProps> = ({ user, onSignOut }) => {
+  const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<OfficerTab>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [reports, setReports] = useState<IncidentReport[]>([]);
@@ -44,8 +46,8 @@ export const OfficerPage: React.FC<OfficerPageProps> = ({ user, onSignOut }) => 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
-      setToastMessage(null), 4000;
-    });
+      setToastMessage(null);
+    }, 4000);
   };
 
   // Handlers
@@ -117,11 +119,15 @@ export const OfficerPage: React.FC<OfficerPageProps> = ({ user, onSignOut }) => 
   const unreviewedReportsCount = reports.filter(r => r.status === 'Awaiting Review').length;
 
   return (
-    <div id="officer-page-container" className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white relative">
-      
+    <div 
+      id="officer-page-container" 
+      className={`min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white ${
+        isDark ? 'bg-black text-white' : 'bg-white text-black'
+      }`}
+    >
       {/* Toast Feedback Banner */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 p-4 rounded-xl bg-blue-600 text-white shadow-2xl border border-blue-400 text-xs font-bold animate-in slide-in-from-top-2 duration-200 flex items-center gap-2">
+        <div className="fixed top-20 right-4 z-50 p-3 rounded-md bg-blue-600 text-white text-xs font-bold shadow-lg border border-blue-500 flex items-center gap-2">
           <span>{toastMessage}</span>
         </div>
       )}
@@ -142,8 +148,35 @@ export const OfficerPage: React.FC<OfficerPageProps> = ({ user, onSignOut }) => 
 
       {/* Mobile Drawer Navigation */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm md:hidden flex flex-col pt-16 px-4 pb-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex-1 flex flex-col justify-between overflow-y-auto">
+        <div 
+          className={`md:hidden fixed inset-x-0 top-16 z-30 border-b p-4 shadow-xl ${
+            isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'
+          }`}
+        >
+          <OfficerSidebar
+            activeTab={activeTab}
+            onSelectTab={(tab) => {
+              setActiveTab(tab);
+              setIsMobileMenuOpen(false);
+            }}
+            reportsCount={reports.length}
+            unreviewedReportsCount={unreviewedReportsCount}
+            casesCount={cases.length}
+            movementsCount={movements.length}
+            unreadCount={unreadCount}
+            onSignOut={onSignOut}
+            isMobileDrawer={true}
+            onCloseMobileDrawer={() => setIsMobileMenuOpen(false)}
+          />
+        </div>
+      )}
+
+      {/* Main Container: Sidebar + Content Area */}
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex">
+        
+        {/* Desktop Sidebar Navigation */}
+        <div className="hidden md:block shrink-0">
+          <div className="sticky top-20">
             <OfficerSidebar
               activeTab={activeTab}
               onSelectTab={setActiveTab}
@@ -153,32 +186,12 @@ export const OfficerPage: React.FC<OfficerPageProps> = ({ user, onSignOut }) => 
               movementsCount={movements.length}
               unreadCount={unreadCount}
               onSignOut={onSignOut}
-              isMobileDrawer={true}
-              onCloseMobileDrawer={() => setIsMobileMenuOpen(false)}
             />
           </div>
         </div>
-      )}
-
-      {/* Main Container: Sidebar + Content Area */}
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex gap-6">
-        
-        {/* Desktop Sidebar Navigation */}
-        <div className="hidden md:block shrink-0">
-          <OfficerSidebar
-            activeTab={activeTab}
-            onSelectTab={setActiveTab}
-            reportsCount={reports.length}
-            unreviewedReportsCount={unreviewedReportsCount}
-            casesCount={cases.length}
-            movementsCount={movements.length}
-            unreadCount={unreadCount}
-            onSignOut={onSignOut}
-          />
-        </div>
 
         {/* Dynamic Content Area */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 py-6 sm:py-8 md:pl-8">
           {activeTab === 'dashboard' && (
             <OfficerDashboardView
               reports={reports}
@@ -239,13 +252,15 @@ export const OfficerPage: React.FC<OfficerPageProps> = ({ user, onSignOut }) => 
         </main>
       </div>
 
-      {/* Station Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-4 text-center text-[11px] text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+      {/* Station Footer - separated by a clean line */}
+      <footer className={`border-t py-4 px-4 text-center text-xs ${
+        isDark ? 'border-white/10 text-slate-500' : 'border-black/10 text-slate-500'
+      }`}>
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>
             {user.station || 'SAPS Sandton Police Station'} • Republic of South Africa
           </span>
-          <span className="font-mono text-slate-500">
+          <span className="font-mono">
             Station Officer: {user.rank} {user.fullName} ({user.personnelNumber})
           </span>
         </div>

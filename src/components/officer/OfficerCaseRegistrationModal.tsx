@@ -212,7 +212,7 @@ export const OfficerCaseRegistrationModal: React.FC<OfficerCaseRegistrationModal
         {registeredCasResult ? (
           /* SUCCESS STATE */
           <div className="p-8 text-center space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto animate-bounce">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto ">
               <CheckCircle2 size={32} />
             </div>
             <div className="space-y-1">

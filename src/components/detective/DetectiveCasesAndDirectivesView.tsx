@@ -135,7 +135,7 @@ export const DetectiveCasesAndDirectivesView: React.FC<DetectiveCasesAndDirectiv
                       </span>
 
                       {needsCustodyAck && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 ">
                           Awaiting Your Receipt
                         </span>
                       )}

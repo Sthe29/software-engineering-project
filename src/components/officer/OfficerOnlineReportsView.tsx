@@ -82,7 +82,7 @@ export const OfficerOnlineReportsView: React.FC<OfficerOnlineReportsViewProps> =
       case 'Awaiting Review':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 " />
             Awaiting Review
           </span>
         );
@@ -293,7 +293,7 @@ export const OfficerOnlineReportsView: React.FC<OfficerOnlineReportsViewProps> =
                   </span>
                 </div>
                 <h2 className="text-lg sm:text-xl font-bold text-white">
-                  {selectedReport.incidentType} — Incident Review
+                  {selectedReport.incidentType} - Incident Review
                 </h2>
                 <p className="text-xs text-slate-400">
                   Station Assigned: <strong className="text-slate-300">{selectedReport.policeStation || officer.station}</strong>

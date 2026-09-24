@@ -245,7 +245,7 @@ export const MyCasesView: React.FC<MyCasesViewProps> = ({ cases, onNavigate }) =
                         event.completed
                           ? 'bg-blue-600 text-white'
                           : event.current
-                          ? 'bg-emerald-500 text-slate-950 animate-pulse'
+                          ? 'bg-emerald-500 text-slate-950 '
                           : 'bg-slate-800 text-slate-500 border border-slate-700'
                       }`}
                     >

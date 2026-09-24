@@ -79,7 +79,7 @@ export const CommanderDashboardView: React.FC<CommanderDashboardViewProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1 pb-1">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 " />
             <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold">
               Station Command Supervision • Active Session
             </span>
@@ -137,7 +137,7 @@ export const CommanderDashboardView: React.FC<CommanderDashboardViewProps> = ({
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Awaiting Assignment</span>
-            <div className={`p-2 rounded-xl ${unassignedCases.length > 0 ? 'bg-amber-500/10 text-amber-400 animate-pulse' : 'bg-slate-800 text-slate-400'}`}>
+            <div className={`p-2 rounded-xl ${unassignedCases.length > 0 ? 'bg-amber-500/10 text-amber-400 ' : 'bg-slate-800 text-slate-400'}`}>
               <UserPlus size={16} />
             </div>
           </div>

@@ -189,7 +189,7 @@ export const OfficerCasesAndReportsView: React.FC<OfficerCasesAndReportsViewProp
       case 'Awaiting Review':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 " />
             Awaiting Review
           </span>
         );
@@ -235,7 +235,7 @@ export const OfficerCasesAndReportsView: React.FC<OfficerCasesAndReportsViewProp
       case 'Investigation Active':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 " />
             Investigation Active
           </span>
         );
@@ -286,7 +286,7 @@ export const OfficerCasesAndReportsView: React.FC<OfficerCasesAndReportsViewProp
               }}
               className="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-amber-400 " />
               <span>{awaitingReviewCount} Awaiting Review</span>
             </button>
           )}
@@ -299,7 +299,7 @@ export const OfficerCasesAndReportsView: React.FC<OfficerCasesAndReportsViewProp
       </div>
 
       {/* Walk-in Citizen Case Opening Desk Banner */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-950/60 via-slate-900 to-slate-900 border border-blue-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg">
+      <div className="p-4 sm:p-5 rounded-md bg-slate-900 border border-blue-600/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start sm:items-center gap-3.5">
           <div className="w-11 h-11 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center shrink-0">
             <UserCheck size={22} />
@@ -309,7 +309,7 @@ export const OfficerCasesAndReportsView: React.FC<OfficerCasesAndReportsViewProp
               <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 font-mono">
                 Station Case Intake Desk
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 " />
             </div>
             <h3 className="text-sm sm:text-base font-black text-white">
               Walk-In Citizen Digital Case Opening
@@ -1215,7 +1215,7 @@ export const OfficerCasesAndReportsView: React.FC<OfficerCasesAndReportsViewProp
                           stage.completed 
                             ? 'bg-emerald-500 border-emerald-400' 
                             : stage.current 
-                              ? 'bg-blue-500 border-blue-400 animate-pulse' 
+                              ? 'bg-blue-500 border-blue-400 ' 
                               : 'bg-slate-800 border-slate-700'
                         }`} />
 

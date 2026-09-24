@@ -83,7 +83,7 @@ export const CommanderDetectivesAndComplaintsView: React.FC<CommanderDetectivesA
             <AlertCircle size={15} />
             <span>Complaints</span>
             {pendingComplaintsCount > 0 ? (
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500 text-white font-extrabold animate-pulse">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500 text-white font-extrabold ">
                 {pendingComplaintsCount} new
               </span>
             ) : (

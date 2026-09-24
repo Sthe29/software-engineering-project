@@ -12,6 +12,7 @@ import {
   Save,
   KeyRound
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ProfileViewProps {
   citizen: CitizenProfile;
@@ -19,6 +20,7 @@ interface ProfileViewProps {
 }
 
 export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitizen }) => {
+  const { isDark } = useTheme();
   // Personal Info State
   const [fullName, setFullName] = useState(citizen.fullName || '');
   const [email, setEmail] = useState(citizen.email || '');
@@ -51,7 +53,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
         phoneNumber
       };
 
-      // Persist in localStorage registered citizens array
       try {
         const stored = localStorage.getItem('sfen_registered_citizens');
         if (stored) {
@@ -116,26 +117,26 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
   return (
     <div id="complainant-profile-view" className="space-y-6 max-w-4xl mx-auto animate-fade-in">
       
-      {/* Header */}
-      <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-          Account Profile & Security Settings
+      {/* Header - separated by clean line */}
+      <div className={`pb-4 border-b ${isDark ? 'border-white/10' : 'border-black/10'}`}>
+        <h2 className={`text-xl sm:text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
+          Account Profile and Security Settings
         </h2>
-        <p className="text-xs text-slate-400 mt-1">
-          Manage your contact information and password security.
+        <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+          Manage your verified contact information and password security.
         </p>
       </div>
 
       {/* Profile Particulars Form */}
-      <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-5">
+      <div className={`py-4 border-b space-y-4 ${isDark ? 'border-white/10' : 'border-black/10'}`}>
         <div className="flex items-center gap-2">
-          <User size={18} className="text-emerald-400" />
-          <h3 className="text-sm font-bold text-white">Personal & Contact Details</h3>
+          <User size={18} className="text-blue-600" />
+          <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-black'}`}>Personal and Contact Details</h3>
         </div>
 
         {profileSuccessToast && (
-          <div className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+          <div className="p-3 rounded-md border border-blue-600 bg-blue-600/10 text-blue-600 text-xs flex items-center gap-2">
+            <CheckCircle2 size={16} className="shrink-0" />
             <span>{profileSuccessToast}</span>
           </div>
         )}
@@ -143,8 +144,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
         <form onSubmit={handleSaveProfile} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <label htmlFor="prof-name" className="text-xs font-semibold text-slate-200 block">
-                Full Name
+              <label htmlFor="prof-name" className={`text-xs font-semibold block ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                Full Legal Name
               </label>
               <div className="relative">
                 <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -154,13 +155,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-500"
+                  className={`w-full pl-9 pr-3 py-2.5 rounded-md text-xs border ${
+                    isDark ? 'bg-black border-slate-700 text-white' : 'bg-white border-slate-300 text-black'
+                  }`}
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="prof-email" className="text-xs font-semibold text-slate-200 block">
+              <label htmlFor="prof-email" className={`text-xs font-semibold block ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                 Email Address
               </label>
               <div className="relative">
@@ -171,13 +174,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-500"
+                  className={`w-full pl-9 pr-3 py-2.5 rounded-md text-xs border ${
+                    isDark ? 'bg-black border-slate-700 text-white' : 'bg-white border-slate-300 text-black'
+                  }`}
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="prof-phone" className="text-xs font-semibold text-slate-200 block">
+              <label htmlFor="prof-phone" className={`text-xs font-semibold block ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                 Mobile Number
               </label>
               <div className="relative">
@@ -188,7 +193,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
                   required
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-emerald-500 font-mono"
+                  className={`w-full pl-9 pr-3 py-2.5 rounded-md text-xs border font-mono ${
+                    isDark ? 'bg-black border-slate-700 text-white' : 'bg-white border-slate-300 text-black'
+                  }`}
                 />
               </div>
             </div>
@@ -198,7 +205,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
             <button
               type="submit"
               disabled={isSavingProfile}
-              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-md transition-colors flex items-center gap-2 cursor-pointer"
             >
               <Save size={14} />
               <span>{isSavingProfile ? 'Saving...' : 'Save Profile Changes'}</span>
@@ -207,23 +214,23 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
         </form>
       </div>
 
-      {/* Change Password Card */}
-      <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-5">
+      {/* Change Password Section - separated by clean line */}
+      <div className={`py-4 border-b space-y-4 ${isDark ? 'border-white/10' : 'border-black/10'}`}>
         <div className="flex items-center gap-2">
-          <KeyRound size={18} className="text-blue-400" />
-          <h3 className="text-sm font-bold text-white">Change Account Password</h3>
+          <KeyRound size={18} className="text-blue-600" />
+          <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-black'}`}>Change Account Password</h3>
         </div>
 
         {passwordSuccessToast && (
-          <div className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 text-xs flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+          <div className="p-3 rounded-md border border-blue-600 bg-blue-600/10 text-blue-600 text-xs flex items-center gap-2">
+            <CheckCircle2 size={16} className="shrink-0" />
             <span>{passwordSuccessToast}</span>
           </div>
         )}
 
         {passwordError && (
-          <div className="p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs flex items-center gap-2">
-            <AlertCircle size={16} className="text-rose-400 shrink-0" />
+          <div className="p-3 rounded-md border border-blue-600 text-blue-600 text-xs flex items-center gap-2">
+            <AlertCircle size={16} className="shrink-0" />
             <span>{passwordError}</span>
           </div>
         )}
@@ -232,7 +239,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             
             <div className="space-y-1.5">
-              <label htmlFor="pwd-curr" className="text-xs font-semibold text-slate-200 block">
+              <label htmlFor="pwd-curr" className={`text-xs font-semibold block ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                 Current Password
               </label>
               <input
@@ -241,13 +248,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
                 required
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500"
+                placeholder="Password"
+                className={`w-full px-3 py-2.5 rounded-md text-xs border ${
+                  isDark ? 'bg-black border-slate-700 text-white' : 'bg-white border-slate-300 text-black'
+                }`}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="pwd-new" className="text-xs font-semibold text-slate-200 block">
+              <label htmlFor="pwd-new" className={`text-xs font-semibold block ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                 New Secure Password
               </label>
               <div className="relative">
@@ -258,7 +267,9 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Min. 8 characters"
-                  className="w-full px-3 pr-9 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 pr-9 py-2.5 rounded-md text-xs border ${
+                    isDark ? 'bg-black border-slate-700 text-white' : 'bg-white border-slate-300 text-black'
+                  }`}
                 />
                 <button
                   type="button"
@@ -271,7 +282,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="pwd-conf" className="text-xs font-semibold text-slate-200 block">
+              <label htmlFor="pwd-conf" className={`text-xs font-semibold block ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                 Confirm New Password
               </label>
               <input
@@ -280,33 +291,31 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:ring-2 focus:ring-blue-500"
+                placeholder="Repeat password"
+                className={`w-full px-3 py-2.5 rounded-md text-xs border ${
+                  isDark ? 'bg-black border-slate-700 text-white' : 'bg-white border-slate-300 text-black'
+                }`}
               />
             </div>
           </div>
 
-          {/* Password Strength Meter */}
+          {/* Password Security Score */}
           {newPassword.length > 0 && (
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-              <div className="flex items-center justify-between text-xs">
+            <div className={`p-3 rounded-md border space-y-1.5 text-xs ${
+              isDark ? 'bg-black border-slate-800' : 'bg-white border-slate-200'
+            }`}>
+              <div className="flex items-center justify-between">
                 <span className="text-slate-400 font-medium">Password Security Score:</span>
-                <span className={`font-bold font-mono ${passwordStrength.color}`}>
+                <span className="font-bold font-mono text-blue-600">
                   {passwordStrength.label} ({passwordStrength.score}/5)
                 </span>
               </div>
-              <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden flex gap-1">
+              <div className="w-full bg-slate-800 h-1.5 rounded-sm overflow-hidden flex gap-1">
                 {[1, 2, 3, 4, 5].map((level) => (
                   <div
                     key={level}
-                    className={`flex-1 h-full transition-all ${
-                      level <= passwordStrength.score
-                        ? passwordStrength.score >= 4
-                          ? 'bg-emerald-500'
-                          : passwordStrength.score >= 3
-                          ? 'bg-amber-500'
-                          : 'bg-rose-500'
-                        : 'bg-transparent'
+                    className={`flex-1 h-full ${
+                      level <= passwordStrength.score ? 'bg-blue-600' : 'bg-transparent'
                     }`}
                   />
                 ))}
@@ -318,7 +327,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ citizen, onUpdateCitiz
             <button
               type="submit"
               disabled={isSavingPassword || !newPassword}
-              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
+              className={`px-5 py-2.5 font-bold text-xs rounded-md transition-colors cursor-pointer border ${
+                isDark 
+                  ? 'bg-black border-white/20 text-white hover:bg-slate-900' 
+                  : 'bg-white border-black/20 text-black hover:bg-slate-100'
+              }`}
             >
               {isSavingPassword ? 'Updating Password...' : 'Update Password'}
             </button>

@@ -293,7 +293,7 @@ export const FindStationView: React.FC<FindStationViewProps> = ({
             {/* Map overlay prompt */}
             <div className="absolute top-3 left-3 z-10 pointer-events-none">
               <div className="px-3 py-1.5 rounded-xl bg-slate-950/90 backdrop-blur-md border border-slate-700 text-white text-xs shadow-lg flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 " />
                 <span className="font-bold">{selectedStation.name}</span>
               </div>
             </div>

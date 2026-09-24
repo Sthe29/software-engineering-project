@@ -352,7 +352,7 @@ export const IncidentLocationPickerMap: React.FC<IncidentLocationPickerMapProps>
         {/* Map Instructions Badge */}
         <div className="absolute top-3 left-3 z-10 pointer-events-none">
           <div className="px-3 py-1.5 rounded-xl bg-slate-900/90 backdrop-blur-md border border-slate-700 text-slate-200 text-[11px] shadow-lg flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500 " />
             <span className="font-medium">Click map to drop / move incident location pin</span>
           </div>
         </div>

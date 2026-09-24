@@ -205,7 +205,7 @@ export const OfficerDocketMovementView: React.FC<OfficerDocketMovementViewProps>
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                      <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                      <span className="w-2 h-2 rounded-full bg-amber-400 " />
                       <span>In Transit / Awaiting Branch Receipt</span>
                     </span>
                   )}

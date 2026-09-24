@@ -234,7 +234,7 @@ export const OfficerDetectiveBranchView: React.FC<OfficerDetectiveBranchViewProp
             <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400 font-mono">
               SAPS Detective Service • Division of Crime Detection
             </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 " />
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-3">
             <span>Detective Branch Workspace</span>

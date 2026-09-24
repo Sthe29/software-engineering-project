@@ -8,14 +8,16 @@ import {
   LogOut, 
   Menu, 
   X, 
-  Shield, 
   Briefcase, 
   FileText, 
   AlertCircle, 
   CheckCheck,
   ChevronRight,
-  Clock
+  Clock,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ComplainantTopNavProps {
   citizen: CitizenProfile;
@@ -40,10 +42,10 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
   mobileMenuOpen,
   onToggleMobileMenu
 }) => {
+  const { isDark, toggleTheme } = useTheme();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // Close notifications popover on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
@@ -85,28 +87,16 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
     }
   };
 
-  const getNotifIcon = (type: ComplainantNotification['type']) => {
-    switch (type) {
-      case 'case':
-        return <Briefcase size={14} className="text-blue-400" />;
-      case 'report':
-        return <FileText size={14} className="text-emerald-400" />;
-      case 'complaint':
-        return <AlertCircle size={14} className="text-amber-400" />;
-      case 'security':
-      default:
-        return <Shield size={14} className="text-indigo-400" />;
-    }
-  };
-
   return (
     <header 
       id="complainant-top-navbar"
-      className="sticky top-0 z-40 w-full bg-slate-950/95 border-b border-slate-800/90 backdrop-blur-md"
+      className={`sticky top-0 z-40 w-full border-b transition-colors ${
+        isDark ? 'bg-black border-white/15 text-white' : 'bg-white border-black/15 text-black'
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
-        {/* Left: Brand / Logo */}
+        {/* Left: Brand */}
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -116,40 +106,57 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
             <SfenLogo size="sm" />
             <div className="hidden sm:block">
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-white text-base tracking-tight group-hover:text-emerald-400 transition-colors">
+                <span className={`font-bold text-base tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
                   SFEN
                 </span>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
+                <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-sm bg-blue-600 text-white">
                   Citizen Portal
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 leading-none">
-                Secure File & Evidence Network
+              <p className={`text-[11px] leading-none ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                Secure File and Evidence Network
               </p>
             </div>
           </button>
         </div>
 
-        {/* Right: Notifications, User info, Logout */}
+        {/* Right: Theme Toggle, Notifications, User info, Logout */}
         <div className="flex items-center gap-2 sm:gap-3">
 
-          {/* Notifications Bell Button & Popover */}
+          {/* Theme Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label="Toggle dark/light theme"
+            className={`p-2 rounded-md border transition-colors flex items-center gap-1.5 text-xs cursor-pointer ${
+              isDark 
+                ? 'bg-black border-white/20 text-white hover:bg-slate-900' 
+                : 'bg-white border-black/20 text-black hover:bg-slate-100'
+            }`}
+          >
+            {isDark ? <Sun size={15} className="text-blue-500" /> : <Moon size={15} className="text-blue-600" />}
+            <span className="hidden lg:inline text-[11px] font-mono">{isDark ? 'Light' : 'Dark'}</span>
+          </button>
+
+          {/* Notifications Bell */}
           <div className="relative" ref={notifRef}>
             <button
               type="button"
               id="btn-nav-notifications"
               onClick={() => setIsNotifOpen(!isNotifOpen)}
-              className={`relative p-2 rounded-xl transition-all cursor-pointer ${
+              className={`relative p-2 rounded-md border transition-colors cursor-pointer ${
                 isNotifOpen
-                  ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 shadow-xs'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900 border border-transparent'
+                  ? 'border-blue-600 text-blue-600 bg-blue-600/10'
+                  : isDark 
+                    ? 'border-white/10 text-slate-300 hover:text-white' 
+                    : 'border-black/10 text-slate-700 hover:text-black'
               }`}
-              title="Notifications & Updates"
+              title="Notifications"
               aria-label="Notifications"
             >
               <Bell size={18} />
               {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-emerald-500 text-slate-950 font-bold text-[10px] flex items-center justify-center animate-pulse">
+                <span className="absolute top-1 right-1 w-4 h-4 rounded-sm bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -159,14 +166,18 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
             {isNotifOpen && (
               <div 
                 id="notifications-popover"
-                className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl z-50 overflow-hidden animate-fade-in"
+                className={`absolute right-0 mt-2 w-80 sm:w-96 rounded-md border shadow-xl z-50 overflow-hidden ${
+                  isDark ? 'bg-black border-white/20 text-white' : 'bg-white border-black/20 text-black'
+                }`}
               >
                 {/* Header */}
-                <div className="p-3.5 px-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
+                <div className={`p-3 border-b flex items-center justify-between ${
+                  isDark ? 'border-white/10 bg-slate-950' : 'border-black/10 bg-slate-50'
+                }`}>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white">Notifications</span>
+                    <span className="text-xs font-bold">Notifications</span>
                     {unreadCount > 0 && (
-                      <span className="text-[10px] px-2 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-blue-600 text-white font-semibold">
                         {unreadCount} new
                       </span>
                     )}
@@ -175,7 +186,7 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
                     <button
                       type="button"
                       onClick={handleMarkAllRead}
-                      className="text-[11px] text-slate-400 hover:text-emerald-300 flex items-center gap-1 transition-colors cursor-pointer"
+                      className="text-[11px] text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <CheckCheck size={13} />
                       <span>Mark all read</span>
@@ -184,12 +195,12 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
                 </div>
 
                 {/* Notifications List */}
-                <div className="max-h-80 overflow-y-auto divide-y divide-slate-800/60">
+                <div className="max-h-80 overflow-y-auto divide-y divide-slate-800">
                   {notifications.length === 0 ? (
-                    <div className="p-8 text-center text-xs text-slate-400 space-y-1.5">
-                      <Bell size={20} className="text-slate-600 mx-auto mb-1" />
-                      <p className="font-semibold text-slate-300">No notifications yet</p>
-                      <p className="text-[11px] text-slate-500">
+                    <div className="p-8 text-center text-xs space-y-1.5">
+                      <Bell size={20} className="text-slate-500 mx-auto mb-1" />
+                      <p className="font-semibold">No notifications</p>
+                      <p className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                         Updates on case dockets and report reviews will appear here.
                       </p>
                     </div>
@@ -199,24 +210,24 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
                         key={item.id}
                         type="button"
                         onClick={() => handleNotificationClick(item)}
-                        className={`w-full text-left p-3.5 hover:bg-slate-800/70 transition-colors flex items-start gap-3 cursor-pointer ${
-                          !item.read ? 'bg-slate-950/40' : ''
+                        className={`w-full text-left p-3.5 hover:bg-blue-600/5 transition-colors flex items-start gap-3 cursor-pointer ${
+                          !item.read ? (isDark ? 'bg-slate-900/50' : 'bg-slate-50') : ''
                         }`}
                       >
-                        <div className="mt-0.5 p-1.5 rounded-lg bg-slate-800 border border-slate-700/60 shrink-0">
-                          {getNotifIcon(item.type)}
+                        <div className="mt-0.5 p-1.5 rounded-sm border border-blue-600/30 text-blue-600 shrink-0">
+                          {item.type === 'case' ? <Briefcase size={14} /> : item.type === 'report' ? <FileText size={14} /> : <AlertCircle size={14} />}
                         </div>
 
                         <div className="flex-1 min-w-0 space-y-0.5">
                           <div className="flex items-center justify-between gap-1">
-                            <p className={`text-xs font-semibold truncate ${!item.read ? 'text-white' : 'text-slate-300'}`}>
+                            <p className="text-xs font-semibold truncate">
                               {item.title}
                             </p>
                             {!item.read && (
-                              <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                              <span className="w-1.5 h-1.5 rounded-sm bg-blue-600 shrink-0" />
                             )}
                           </div>
-                          <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                          <p className={`text-[11px] line-clamp-2 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                             {item.message}
                           </p>
                           <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1">
@@ -224,7 +235,7 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
                               <Clock size={10} />
                               <span>{new Date(item.timestamp).toLocaleDateString()}</span>
                             </span>
-                            <span className="text-emerald-400 hover:underline flex items-center gap-0.5">
+                            <span className="text-blue-600 hover:underline flex items-center gap-0.5">
                               <span>View</span>
                               <ChevronRight size={10} />
                             </span>
@@ -236,53 +247,57 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
                 </div>
 
                 {/* Footer link to Records */}
-                <div className="p-2.5 bg-slate-950/80 border-t border-slate-800 text-center">
+                <div className={`p-2.5 border-t text-center ${isDark ? 'border-white/10' : 'border-black/10'}`}>
                   <button
                     type="button"
                     onClick={() => {
                       setIsNotifOpen(false);
                       onSelectTab('my-records');
                     }}
-                    className="text-[11px] font-semibold text-emerald-400 hover:underline"
+                    className="text-[11px] font-semibold text-blue-600 hover:underline cursor-pointer"
                   >
-                    View all cases & reports →
+                    View all cases and reports
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* User Profile Pill */}
+          {/* User Profile */}
           <button
             type="button"
             id="btn-nav-profile-pill"
             onClick={() => onSelectTab('profile')}
-            className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md border transition-colors cursor-pointer ${
               activeTab === 'profile'
-                ? 'bg-slate-900 border-emerald-500/50 text-emerald-300'
-                : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-900 hover:border-slate-700'
+                ? 'border-blue-600 text-blue-600'
+                : isDark 
+                  ? 'border-white/10 text-slate-300 hover:text-white' 
+                  : 'border-black/10 text-slate-700 hover:text-black'
             }`}
           >
-            <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold text-xs uppercase shadow-xs">
+            <div className="w-6 h-6 rounded-sm bg-blue-600 flex items-center justify-center text-white font-bold text-xs uppercase">
               {citizen.fullName ? citizen.fullName.charAt(0) : 'U'}
             </div>
-            <div className="text-left hidden md:block">
-              <p className="text-xs font-semibold text-slate-200 leading-tight max-w-[140px] truncate">
-                {citizen.fullName || 'Citizen User'}
-              </p>
-            </div>
+            <span className="text-xs font-semibold hidden md:inline truncate max-w-[120px]">
+              {citizen.fullName || 'Citizen User'}
+            </span>
           </button>
 
-          {/* Single Official Logout Button */}
+          {/* Logout Button */}
           <button
             type="button"
             id="btn-nav-logout"
             onClick={onSignOut}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-medium text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 border border-slate-800 hover:border-rose-500/30 transition-colors cursor-pointer"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
+              isDark 
+                ? 'border-white/20 text-slate-300 hover:text-white hover:border-white' 
+                : 'border-black/20 text-slate-700 hover:text-black hover:border-black'
+            }`}
             title="Sign out of SFEN"
           >
-            <LogOut size={15} />
-            <span className="hidden xs:inline">Logout</span>
+            <LogOut size={14} />
+            <span className="hidden xs:inline">Sign Out</span>
           </button>
 
           {/* Mobile Menu Toggle Button */}
@@ -290,10 +305,10 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
             type="button"
             id="btn-mobile-menu-toggle"
             onClick={onToggleMobileMenu}
-            className="md:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-900 border border-slate-800 cursor-pointer"
+            className="md:hidden p-2 rounded-md border border-slate-700 cursor-pointer"
             aria-label="Toggle navigation menu"
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
 
@@ -301,4 +316,3 @@ export const ComplainantTopNav: React.FC<ComplainantTopNavProps> = ({
     </header>
   );
 };
-

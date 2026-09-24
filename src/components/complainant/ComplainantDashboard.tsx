@@ -19,6 +19,7 @@ import { DashboardOverview } from './DashboardOverview';
 import { ReportIncidentForm } from './ReportIncidentForm';
 import { CombinedRecordsView } from './CombinedRecordsView';
 import { ProfileView } from './ProfileView';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ComplainantDashboardProps {
   citizen: CitizenProfile;
@@ -31,6 +32,7 @@ export const ComplainantDashboard: React.FC<ComplainantDashboardProps> = ({
   onSignOut,
   onUpdateCitizen
 }) => {
+  const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<ComplainantTab>('dashboard');
   const [recordsSubTab, setRecordsSubTab] = useState<'cases' | 'reports' | 'complaints'>('cases');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -54,7 +56,7 @@ export const ComplainantDashboard: React.FC<ComplainantDashboardProps> = ({
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const handleReportSubmitted = (newReport: IncidentReport) => {
+  const handleReportSubmitted = () => {
     loadData();
     setRecordsSubTab('reports');
     setActiveTab('my-records');
@@ -76,7 +78,12 @@ export const ComplainantDashboard: React.FC<ComplainantDashboardProps> = ({
   };
 
   return (
-    <div id="complainant-portal-shell" className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-600 selection:text-white">
+    <div 
+      id="complainant-portal-shell" 
+      className={`min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white ${
+        isDark ? 'bg-black text-white' : 'bg-white text-black'
+      }`}
+    >
       
       {/* Top Navbar */}
       <ComplainantTopNav
@@ -98,7 +105,9 @@ export const ComplainantDashboard: React.FC<ComplainantDashboardProps> = ({
       {mobileMenuOpen && (
         <div 
           id="complainant-mobile-drawer-overlay"
-          className="md:hidden fixed inset-x-0 top-16 z-30 bg-slate-950/95 border-b border-slate-800 p-4 backdrop-blur-xl shadow-2xl animate-fade-in"
+          className={`md:hidden fixed inset-x-0 top-16 z-30 border-b p-4 shadow-xl ${
+            isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'
+          }`}
         >
           <ComplainantSidebar
             activeTab={activeTab}
@@ -117,11 +126,11 @@ export const ComplainantDashboard: React.FC<ComplainantDashboardProps> = ({
         </div>
       )}
 
-      {/* Main Body Layout: Sidebar + Main Views */}
+      {/* Main Body Layout */}
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex">
         
         {/* Desktop Sidebar */}
-        <div className="hidden md:block shrink-0 border-r border-slate-800/80">
+        <div className="hidden md:block shrink-0">
           <div className="sticky top-20">
             <ComplainantSidebar
               activeTab={activeTab}
@@ -144,7 +153,6 @@ export const ComplainantDashboard: React.FC<ComplainantDashboardProps> = ({
               reports={reports}
               cases={cases}
               complaints={complaints}
-              notifications={notifications}
               onNavigate={handleNavigate}
             />
           )}
@@ -179,30 +187,11 @@ export const ComplainantDashboard: React.FC<ComplainantDashboardProps> = ({
         </main>
       </div>
 
-      {/* Legal & Statutory Police Footer */}
-      <footer className="w-full border-t border-slate-800/80 bg-slate-950/90 py-5 px-4 sm:px-6 mt-12 text-center md:text-left text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="space-y-0.5">
-            <p className="font-semibold text-slate-400">
-              National Police Service • Secure File & Evidence Network (SFEN) Complainant Portal
-            </p>
-            <p className="text-[11px] text-slate-500 max-w-2xl leading-relaxed">
-              Protected under the Criminal Procedure Act, Data Protection Act, and Evidence Directives. False reporting or fabrication of criminal complaints is a punishable crime.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4 text-[11px] text-slate-400 shrink-0">
-            <span>SFEN v2.4.0 (Citizen)</span>
-            <span>•</span>
-            <span className="hover:text-slate-300 transition-colors cursor-pointer" onClick={() => handleNavigate('complaints')}>
-              File Grievance
-            </span>
-            <span>•</span>
-            <span className="hover:text-slate-300 transition-colors cursor-pointer" onClick={() => handleNavigate('profile')}>
-              Account Privacy
-            </span>
-          </div>
-        </div>
+      {/* Bottom Legal Notice - separated by a clean line */}
+      <footer className={`border-t py-4 px-4 text-center text-xs ${
+        isDark ? 'border-white/10 text-slate-500' : 'border-black/10 text-slate-500'
+      }`}>
+        <p>Republic of South Africa - Official e-Docket System - Strict RBAC Enforcement</p>
       </footer>
     </div>
   );

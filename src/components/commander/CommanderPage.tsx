@@ -21,6 +21,7 @@ import { CommanderProfileView } from './CommanderProfileView';
 import { CommanderCaseWorkspaceModal } from './CommanderCaseWorkspaceModal';
 import { CommanderAssignDetectiveModal } from './CommanderAssignDetectiveModal';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface CommanderPageProps {
   user: UserProfile;
@@ -31,6 +32,7 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
   user,
   onSignOut
 }) => {
+  const { isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<CommanderNavTab>('dashboard');
   const [casesFilter, setCasesFilter] = useState<string>('all');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -99,7 +101,6 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
       ...params,
       commander: user
     });
-
     if (res.success) {
       showToast(res.message, 'success');
       setActiveAssignCase(null);
@@ -110,12 +111,12 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
   };
 
   const handleOpenCaseByNumber = (caseNumber: string) => {
-    const target = cases.find(c => c.caseNumber.trim().toUpperCase() === caseNumber.trim().toUpperCase());
-    if (target) {
-      handleOpenCaseWorkspace(target, 'overview');
+    const found = cases.find(c => c.caseNumber === caseNumber);
+    if (found) {
+      handleOpenCaseWorkspace(found, 'overview');
     } else {
       setActiveTab('cases');
-      showToast(`Case ${caseNumber} not found.`, 'error');
+      setCasesFilter('all');
     }
   };
 
@@ -123,21 +124,23 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
     setActiveTab('complaints');
   };
 
-  const handleFilterCasesByDetective = (detectivePersonnelNumber: string) => {
-    setCasesFilter('all');
-    setActiveTab('cases');
-  };
-
-  const unreadNotifCount = notifications.filter(n => !n.read).length;
   const unassignedCount = cases.filter(
     c => !c.investigatingOfficerPersonnelNumber || c.investigatingOfficerName === 'Unassigned'
   ).length;
+
   const pendingComplaintsCount = complaints.filter(
-    c => c.status === 'Pending Review' || c.status === 'Under Investigation'
+    c => c.status === 'UNDER_INVESTIGATION' || c.status === 'ESCALATED_COMMAND'
   ).length;
 
+  const unreadNotifCount = notifications.filter(n => !n.read).length;
+
   return (
-    <div id="commander-portal" className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div 
+      id="commander-portal" 
+      className={`min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white ${
+        isDark ? 'bg-black text-white' : 'bg-white text-black'
+      }`}
+    >
       
       {/* Top Navigation */}
       <CommanderTopNav
@@ -164,15 +167,18 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       />
 
-      {/* Main Body Container with Sidebar and Content */}
-      <div className="flex-1 flex max-w-7xl w-full mx-auto overflow-hidden">
-        
-        {/* Desktop Sidebar (Left) */}
-        <div className="hidden md:block w-64 shrink-0">
+      {/* Mobile Drawer Navigation */}
+      {isMobileMenuOpen && (
+        <div 
+          className={`md:hidden fixed inset-x-0 top-16 z-30 border-b p-4 shadow-xl ${
+            isDark ? 'bg-black border-white/10' : 'bg-white border-black/10'
+          }`}
+        >
           <CommanderSidebar
             activeTab={activeTab}
             onNavigate={(tab) => {
               setActiveTab(tab);
+              setIsMobileMenuOpen(false);
               if (tab === 'cases') setCasesFilter('all');
             }}
             onSignOut={onSignOut}
@@ -181,48 +187,44 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
             detectivesCount={AUTHORISED_STATION_DETECTIVES.length}
             pendingComplaintsCount={pendingComplaintsCount}
             unreadNotificationsCount={unreadNotifCount}
+            onCloseMobileDrawer={() => setIsMobileMenuOpen(false)}
           />
         </div>
+      )}
 
-        {/* Mobile Navigation Drawer */}
-        {isMobileMenuOpen && (
-          <div 
-            className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm md:hidden flex"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) setIsMobileMenuOpen(false);
-            }}
-          >
-            <div className="w-72 h-full bg-slate-900 border-r border-slate-800 shadow-2xl animate-in slide-in-from-left duration-200">
-              <CommanderSidebar
-                activeTab={activeTab}
-                onNavigate={(tab) => {
-                  setActiveTab(tab);
-                  setIsMobileMenuOpen(false);
-                  if (tab === 'cases') setCasesFilter('all');
-                }}
-                onSignOut={onSignOut}
-                casesCount={cases.length}
-                unassignedCasesCount={unassignedCount}
-                detectivesCount={AUTHORISED_STATION_DETECTIVES.length}
-                pendingComplaintsCount={pendingComplaintsCount}
-                unreadNotificationsCount={unreadNotifCount}
-                onCloseMobileDrawer={() => setIsMobileMenuOpen(false)}
-              />
-            </div>
+      {/* Main Body Container with Sidebar and Content */}
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 flex">
+        
+        {/* Desktop Sidebar (Left) */}
+        <div className="hidden md:block shrink-0">
+          <div className="sticky top-20">
+            <CommanderSidebar
+              activeTab={activeTab}
+              onNavigate={(tab) => {
+                setActiveTab(tab);
+                if (tab === 'cases') setCasesFilter('all');
+              }}
+              onSignOut={onSignOut}
+              casesCount={cases.length}
+              unassignedCasesCount={unassignedCount}
+              detectivesCount={AUTHORISED_STATION_DETECTIVES.length}
+              pendingComplaintsCount={pendingComplaintsCount}
+              unreadNotificationsCount={unreadNotifCount}
+            />
           </div>
-        )}
+        </div>
 
         {/* Scrollable View Content (Right) */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+        <main className="flex-1 min-w-0 py-6 sm:py-8 md:pl-8">
           
           {/* Global Toast */}
           {toastMessage && (
-            <div className={`mb-4 p-3.5 rounded-xl border text-xs font-semibold flex items-center gap-2 animate-in fade-in ${
+            <div className={`mb-4 p-3 rounded-md border text-xs font-semibold flex items-center gap-2 ${
               toastMessage.type === 'success'
-                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+                ? 'bg-blue-600/10 border-blue-600 text-blue-600'
+                : 'bg-black border-white/20 text-white'
             }`}>
-              {toastMessage.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+              <CheckCircle2 size={16} className="text-blue-600" />
               <span>{toastMessage.text}</span>
             </div>
           )}
@@ -236,8 +238,8 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
               complaints={complaints}
               onOpenCase={handleOpenCaseWorkspace}
               onNavigateToCases={(filter) => {
-                if (filter) setCasesFilter(filter);
                 setActiveTab('cases');
+                if (filter) setCasesFilter(filter);
               }}
               onNavigateToDetectives={() => setActiveTab('detectives')}
               onNavigateToComplaints={() => setActiveTab('complaints')}
@@ -245,28 +247,47 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
             />
           )}
 
-          {/* VIEW: CASES */}
+          {/* VIEW: CASES & INSPECTION */}
           {activeTab === 'cases' && (
             <CommanderCasesView
               cases={cases}
+              instructions={instructions}
+              commander={user}
               initialFilter={casesFilter}
-              onOpenCase={handleOpenCaseWorkspace}
+              onOpenCaseWorkspace={handleOpenCaseWorkspace}
               onOpenAssignModal={handleOpenAssignModal}
+              onRefreshData={() => refreshAllData(true)}
             />
           )}
 
-          {/* VIEW: COMBINED DETECTIVES & COMPLAINTS */}
-          {(activeTab === 'detectives-complaints' || activeTab === 'detectives' || activeTab === 'complaints') && (
-            <CommanderDetectivesAndComplaintsView
+          {/* VIEW: DETECTIVES & WORKLOAD */}
+          {activeTab === 'detectives' && (
+            <CommanderDetectivesView
+              detectivesWorkload={detectivesWorkload}
+              cases={cases}
               commander={user}
+              onOpenCaseWorkspace={handleOpenCaseWorkspace}
+            />
+          )}
+
+          {/* VIEW: COMPLAINTS & GRIEVANCES */}
+          {activeTab === 'complaints' && (
+            <CommanderComplaintsView
+              complaints={complaints}
+              commander={user}
+              onRefreshData={() => refreshAllData(false)}
+            />
+          )}
+
+          {/* VIEW: DETECTIVES AND COMPLAINTS COMBINED VIEW */}
+          {activeTab === 'detectives-complaints' && (
+            <CommanderDetectivesAndComplaintsView
               detectivesWorkload={detectivesWorkload}
               complaints={complaints}
               cases={cases}
-              initialSubTab={activeTab === 'complaints' ? 'complaints' : 'detectives'}
-              onOpenCase={handleOpenCaseWorkspace}
-              onOpenCaseByNumber={handleOpenCaseByNumber}
-              onFilterCasesByDetective={handleFilterCasesByDetective}
-              onRefreshComplaints={() => refreshAllData(false)}
+              commander={user}
+              onOpenCaseWorkspace={handleOpenCaseWorkspace}
+              onRefreshData={() => refreshAllData(false)}
             />
           )}
 
@@ -274,11 +295,11 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
           {activeTab === 'notifications' && (
             <CommanderNotificationsView
               notifications={notifications}
-              onMarkNotificationAsRead={(id) => {
+              onMarkAsRead={(id) => {
                 commanderService.markNotificationRead(id);
                 refreshAllData(false);
               }}
-              onMarkAllNotificationsAsRead={() => {
+              onMarkAllAsRead={() => {
                 commanderService.markAllNotificationsRead();
                 refreshAllData(false);
               }}
@@ -294,6 +315,20 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
 
         </main>
       </div>
+
+      {/* Station Footer - separated by a clean line */}
+      <footer className={`border-t py-4 px-4 text-center text-xs ${
+        isDark ? 'border-white/10 text-slate-500' : 'border-black/10 text-slate-500'
+      }`}>
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>
+            {user.station || 'SAPS Sandton Police Station'} • Republic of South Africa
+          </span>
+          <span className="font-mono">
+            Station Commander: {user.rank} {user.fullName} ({user.personnelNumber})
+          </span>
+        </div>
+      </footer>
 
       {/* SUPERVISORY CASE / DOCKET WORKSPACE MODAL */}
       {activeWorkspaceCase && (
