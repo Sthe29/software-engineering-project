@@ -15,6 +15,7 @@ import {
   SupervisoryReviewRecord,
   CommanderNotification
 } from '../types/commander';
+import { detectiveService } from './detectiveService';
 
 const STORAGE_KEYS = {
   CASES: 'sfen_detective_dockets',
@@ -219,7 +220,10 @@ export const commanderService = {
    * Injects an unassigned case if none exists to guarantee the Commander has realistic assignment workflows.
    */
   getSupervisedCases(): DetectiveCaseDocket[] {
-    let cases = safeStorageGet<DetectiveCaseDocket[]>(STORAGE_KEYS.CASES, []);
+    let cases = safeStorageGet<DetectiveCaseDocket[]>(STORAGE_KEYS.CASES, detectiveService.getAllCases());
+    if (cases.length === 0) {
+      cases = detectiveService.getAllCases();
+    }
 
     // Ensure we have the unassigned case CAS 512/09/2026 registered from CSC
     const hasUnassigned = cases.some(c => c.caseNumber === 'CAS 512/09/2026');

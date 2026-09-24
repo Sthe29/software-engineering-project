@@ -439,11 +439,18 @@ const SEED_NOTIFS: DetectiveNotification[] = [
 
 export const detectiveService = {
   /**
+   * Retrieves all cases across the station docket register.
+   */
+  getAllCases(): DetectiveCaseDocket[] {
+    return safeStorageGet<DetectiveCaseDocket[]>(DETECTIVE_STORAGE_KEYS.CASES, SEED_CASES);
+  },
+
+  /**
    * Retrieves ONLY cases assigned to the logged-in detective.
    * Enforces zero cross-detective leakage.
    */
   getAssignedCases(detectivePersonnelNumber: string): DetectiveCaseDocket[] {
-    const cases = safeStorageGet<DetectiveCaseDocket[]>(DETECTIVE_STORAGE_KEYS.CASES, SEED_CASES);
+    const cases = this.getAllCases();
     const cleanNumber = detectivePersonnelNumber.trim().toUpperCase();
     return cases.filter(c => 
       c.investigatingOfficerPersonnelNumber.toUpperCase() === cleanNumber ||

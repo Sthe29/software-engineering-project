@@ -33,8 +33,6 @@ export const DetectiveSidebar: React.FC<DetectiveSidebarProps> = ({
     }
   };
 
-  const isCasesOrDirectivesActive = activeTab === 'cases' || activeTab === 'instructions';
-
   const navItems: Array<{
     id: DetectiveNavTab;
     label: string;
@@ -51,15 +49,11 @@ export const DetectiveSidebar: React.FC<DetectiveSidebarProps> = ({
     },
     {
       id: 'cases',
-      label: 'Cases & Directives',
+      label: 'Assigned Cases',
       icon: Briefcase,
-      badge: outstandingInstructionsCount > 0 
-        ? `${casesCount} • ${outstandingInstructionsCount} due`
-        : casesCount,
-      badgeColor: outstandingInstructionsCount > 0
-        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold'
-        : 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-      isActive: isCasesOrDirectivesActive
+      badge: casesCount,
+      badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+      isActive: activeTab === 'cases'
     },
     {
       id: 'profile',

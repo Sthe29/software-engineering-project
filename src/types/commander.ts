@@ -4,6 +4,7 @@ import { ComplaintCategory } from './complainant';
 export type CommanderNavTab = 
   | 'dashboard'
   | 'cases'
+  | 'detectives-complaints'
   | 'detectives'
   | 'complaints'
   | 'notifications'

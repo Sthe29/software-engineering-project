@@ -3,6 +3,7 @@ import {
   RegisteredCase, 
   ComplainantNotification 
 } from '../types/complainant';
+import { SEED_REPORTS } from './complainantService';
 import { UserProfile } from '../types/auth';
 import { 
   OfficerAuditLog, 
@@ -234,7 +235,7 @@ function saveToStorage<T>(key: string, data: T): void {
 export const officerService = {
   // Get all incident reports
   getReports(): IncidentReport[] {
-    return loadFromStorage<IncidentReport[]>(STORAGE_KEYS.REPORTS, []);
+    return loadFromStorage<IncidentReport[]>(STORAGE_KEYS.REPORTS, SEED_REPORTS);
   },
 
   // Mark report as under review

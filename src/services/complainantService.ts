@@ -15,7 +15,7 @@ const STORAGE_KEYS = {
 };
 
 // Default seed data for rich presentation
-const SEED_REPORTS: IncidentReport[] = [
+export const SEED_REPORTS: IncidentReport[] = [
   {
     id: 'rpt_seed_001',
     referenceNumber: 'SFEN-RPT-000124',

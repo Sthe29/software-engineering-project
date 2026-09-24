@@ -65,34 +65,21 @@ export const CommanderSidebar: React.FC<CommanderSidebarProps> = ({
       )
     },
     {
-      id: 'detectives' as CommanderNavTab,
-      label: 'Detectives',
+      id: 'detectives-complaints' as CommanderNavTab,
+      label: 'Detectives & Complaints',
       icon: <Users size={18} />,
       badge: (
-        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-slate-800 text-slate-400">
-          {detectivesCount}
-        </span>
+        <div className="flex items-center gap-1 font-mono text-[10px]">
+          <span className="px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-400">
+            {detectivesCount}
+          </span>
+          {pendingComplaintsCount > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white font-bold animate-pulse">
+              {pendingComplaintsCount}
+            </span>
+          )}
+        </div>
       )
-    },
-    {
-      id: 'complaints' as CommanderNavTab,
-      label: 'Complaints',
-      icon: <AlertCircle size={18} />,
-      badge: pendingComplaintsCount > 0 ? (
-        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-500/20 text-rose-300 border border-rose-500/30">
-          {pendingComplaintsCount} new
-        </span>
-      ) : null
-    },
-    {
-      id: 'notifications' as CommanderNavTab,
-      label: 'Notifications',
-      icon: <Bell size={18} />,
-      badge: unreadNotificationsCount > 0 ? (
-        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500 text-slate-950">
-          {unreadNotificationsCount}
-        </span>
-      ) : null
     },
     {
       id: 'profile' as CommanderNavTab,
@@ -114,7 +101,8 @@ export const CommanderSidebar: React.FC<CommanderSidebarProps> = ({
 
           <nav className="space-y-1">
             {navItems.map((item) => {
-              const isActive = activeTab === item.id;
+              const isActive = activeTab === item.id || 
+                (item.id === 'detectives-complaints' && (activeTab === 'detectives' || activeTab === 'complaints'));
               return (
                 <button
                   key={item.id}

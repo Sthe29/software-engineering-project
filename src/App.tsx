@@ -2,18 +2,23 @@ import React, { useState } from 'react';
 import { OfficialTopBar } from './components/OfficialTopBar';
 import { LoginForm } from './components/LoginForm';
 import { CitizenPortal } from './components/CitizenPortal';
+import { WelcomePage } from './components/WelcomePage';
 import { ComplainantDashboard } from './components/complainant/ComplainantDashboard';
 import { AdminPage } from './components/admin/AdminPage';
 import { OfficerPage } from './components/officer/OfficerPage';
 import { DetectivePage } from './components/detective/DetectivePage';
+import { CommanderPage } from './components/commander/CommanderPage';
 import { ForgotPasswordModal } from './components/ForgotPasswordModal';
 import { AuthenticationSuccessModal } from './components/AuthenticationSuccessModal';
 import { DemoAccountsDrawer } from './components/DemoAccountsDrawer';
 import { UserProfile, DemoAccount, PortalType, CitizenProfile } from './types/auth';
-import { ShieldCheck, Lock, FileCheck2, Scale, Users, ShieldAlert, Sparkles, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Lock, FileCheck2, Scale, Users, ShieldAlert, Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function App() {
-  // Focus on the citizen ("the people") side by default as requested
+  // Welcoming Page is the default landing screen as requested by user
+  const [viewMode, setViewMode] = useState<'welcome' | 'portal'>('welcome');
+
+  // Focus on the citizen ("the people") side by default when entering portal
   const [activePortal, setActivePortal] = useState<PortalType>('citizen');
   
   // Police Official Session State
@@ -37,10 +42,12 @@ export default function App() {
 
   const handleSignOutOfficer = () => {
     setAuthenticatedOfficer(null);
+    setViewMode('welcome');
   };
 
   const handleSignOutCitizen = () => {
     setAuthenticatedCitizen(null);
+    setViewMode('welcome');
   };
 
   const handleDirectDemoCitizenLogin = () => {
@@ -108,6 +115,23 @@ export default function App() {
     setAuthenticatedOfficer(demoDetective);
   };
 
+  const handleDirectDemoCommanderLogin = () => {
+    const demoCommander: UserProfile = {
+      id: 'usr_pol_30912',
+      personnelNumber: 'POL-30912',
+      fullName: 'Elena Vance',
+      rank: 'Senior Superintendent',
+      email: 'e.vance@command.sfen.gov',
+      station: 'SAPS Sandton Police Station',
+      division: 'Station Commander / CID Executive Oversight',
+      role: 'COMMANDER',
+      clearanceLevel: 'Level 3 - Station Command & Docket Authorization',
+      lastLogin: new Date().toISOString(),
+      token: 'jwt_mock_commander_token_sfen_2026'
+    };
+    setAuthenticatedOfficer(demoCommander);
+  };
+
   const handleOpenForgotPassword = (identifier: string) => {
     setForgotPasswordIdentifier(identifier);
     setIsForgotPasswordOpen(true);
@@ -128,8 +152,18 @@ export default function App() {
     );
   }
 
+  // If station commander / supervisory officer is authenticated, render the Station Commander Portal
+  if (authenticatedOfficer && authenticatedOfficer.role === 'COMMANDER') {
+    return (
+      <CommanderPage
+        user={authenticatedOfficer}
+        onSignOut={handleSignOutOfficer}
+      />
+    );
+  }
+
   // If detective / investigating officer is authenticated, render the standalone Detective Page
-  if (authenticatedOfficer && (authenticatedOfficer.role === 'DETECTIVE' || authenticatedOfficer.role === 'COMMANDER')) {
+  if (authenticatedOfficer && authenticatedOfficer.role === 'DETECTIVE') {
     return (
       <DetectivePage
         user={authenticatedOfficer}
@@ -158,6 +192,42 @@ export default function App() {
     );
   }
 
+  // Welcoming Page (Default Landing Screen)
+  if (viewMode === 'welcome') {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white relative overflow-x-hidden">
+        {/* Top Official Status Bar */}
+        <div className="relative z-10">
+          <OfficialTopBar />
+        </div>
+
+        {/* Full Interactive Welcoming Experience */}
+        <WelcomePage
+          onSignInCitizen={() => {
+            setActivePortal('citizen');
+            setViewMode('portal');
+          }}
+          onSignInOfficial={() => {
+            setActivePortal('official');
+            setViewMode('portal');
+          }}
+          onQuickDemoCitizen={handleDirectDemoCitizenLogin}
+          onQuickDemoCommander={handleDirectDemoCommanderLogin}
+          onQuickDemoDetective={handleDirectDemoDetectiveLogin}
+          onQuickDemoOfficer={handleDirectDemoOfficerLogin}
+          onQuickDemoAdmin={handleDirectDemoAdminLogin}
+        />
+
+        {/* Forgot Password Modal */}
+        <ForgotPasswordModal
+          isOpen={isForgotPasswordOpen}
+          onClose={() => setIsForgotPasswordOpen(false)}
+          initialIdentifier={forgotPasswordIdentifier}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white relative overflow-x-hidden">
       {/* Background Decorative Police Matrix & Security Gradients */}
@@ -176,6 +246,22 @@ export default function App() {
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-6 sm:py-10">
         <div className="w-full max-w-5xl mx-auto flex flex-col items-center">
           
+          {/* Back to Welcoming Page Navigation Bar */}
+          <div className="w-full max-w-xl mx-auto mb-4 flex items-center justify-between px-1">
+            <button
+              type="button"
+              id="btn-back-to-welcome"
+              onClick={() => setViewMode('welcome')}
+              className="inline-flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white px-3.5 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 transition-all cursor-pointer shadow-md group"
+            >
+              <ArrowLeft size={14} className="text-emerald-400 group-hover:-translate-x-0.5 transition-transform" />
+              <span>← Back to Welcoming Page</span>
+            </button>
+            <span className="text-[11px] text-slate-400 font-mono hidden sm:inline bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-800">
+              SAPS Official E-Policing Terminal
+            </span>
+          </div>
+
           {/* Main Portal Switcher: The People (Citizen) vs Police Officials */}
           <div className="w-full max-w-md mx-auto mb-6">
             <div className="p-1 rounded-2xl bg-slate-900/95 border border-slate-800 shadow-xl flex items-center gap-1 backdrop-blur-md">
@@ -284,8 +370,24 @@ export default function App() {
                     prefillAccount={selectedDemoAccount}
                   />
 
-                  {/* Quick Demo Access for Detective, Police Officer & System Administrator */}
+                  {/* Quick Demo Access for Commander, Detective, Police Officer & System Administrator */}
                   <div className="mt-4 w-full max-w-lg space-y-2">
+                    <button
+                      type="button"
+                      id="btn-quick-demo-commander"
+                      onClick={handleDirectDemoCommanderLogin}
+                      className="w-full py-2 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-900 border border-emerald-500/30 hover:border-emerald-500/60 text-emerald-300 text-xs font-semibold transition-all flex items-center justify-between cursor-pointer group shadow-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Sparkles size={14} className="text-emerald-400 group-hover:rotate-12 transition-transform" />
+                        <span>Quick Demo: Instant Access as Station Commander <strong>(Snr. Supt. Elena Vance)</strong></span>
+                      </div>
+                      <div className="flex items-center gap-1 text-[11px] text-emerald-400">
+                        <span>Enter Commander Portal</span>
+                        <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                      </div>
+                    </button>
+
                     <button
                       type="button"
                       id="btn-quick-demo-detective"
@@ -387,7 +489,7 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4 text-[11px] text-slate-400 shrink-0">
-            <span className="hover:text-slate-300 transition-colors cursor-pointer" onClick={() => alert('SFEN System Version: 2.4.0-PROD (Build: 20260921)\nSecurity Specification: NIST SP 800-53 / ISO 27001')}>
+            <span className="text-slate-400">
               System Ver. 2.4.0
             </span>
             <span>•</span>
@@ -395,8 +497,8 @@ export default function App() {
               Public Help Desk
             </span>
             <span>•</span>
-            <span className="hover:text-slate-300 transition-colors cursor-pointer" onClick={() => alert('Chain of custody: Each docket action is immutably appended to the police audit register.')}>
-              Chain of Custody
+            <span className="text-slate-400">
+              Chain of Custody Compliant
             </span>
           </div>
         </div>

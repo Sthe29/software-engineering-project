@@ -120,7 +120,7 @@ export const DetectiveDashboardView: React.FC<DetectiveDashboardViewProps> = ({
 
         {/* 3. Outstanding Supervisor Directives */}
         <div 
-          onClick={() => onNavigateToCases('directives')}
+          onClick={() => onNavigateToCases()}
           className="p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-purple-500/40 transition-all cursor-pointer group space-y-2"
         >
           <div className="flex items-center justify-between">

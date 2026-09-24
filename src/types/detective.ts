@@ -1,8 +1,6 @@
 export type DetectiveNavTab = 
   | 'dashboard'
   | 'cases'
-  | 'instructions'
-  | 'notifications'
   | 'profile';
 
 export type CaseWorkspaceTab = 

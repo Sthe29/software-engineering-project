@@ -74,8 +74,6 @@ export const DetectiveTopNav: React.FC<DetectiveTopNavProps> = ({
         : item.type === 'MOVEMENT' ? 'movements' 
         : 'overview';
       onOpenCaseByNumber(item.caseNumber, initialTab);
-    } else if (item.type === 'INSTRUCTION') {
-      onNavigate('instructions');
     } else {
       onNavigate('cases');
     }
@@ -241,18 +239,20 @@ export const DetectiveTopNav: React.FC<DetectiveTopNavProps> = ({
                   )}
                 </div>
 
-                <div className="p-2.5 bg-slate-950/60 border-t border-slate-800 text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsNotifOpen(false);
-                      onNavigate('notifications');
-                    }}
-                    className="text-xs font-bold text-amber-400 hover:text-amber-300 inline-flex items-center gap-1 transition-colors cursor-pointer"
-                  >
-                    <span>View all notifications</span>
-                    <ChevronRight size={13} />
-                  </button>
+                <div className="p-2.5 bg-slate-950/60 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 px-3">
+                  <span className="flex items-center gap-1.5 text-slate-400">
+                    <ShieldCheck size={13} className="text-amber-400" />
+                    <span>Live Station Alerts</span>
+                  </span>
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={onMarkAllNotificationsAsRead}
+                      className="text-amber-400 hover:text-amber-300 font-semibold cursor-pointer"
+                    >
+                      Mark all read
+                    </button>
+                  )}
                 </div>
               </div>
             )}

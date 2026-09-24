@@ -12,7 +12,6 @@ import { DetectiveSidebar } from './DetectiveSidebar';
 import { DetectiveTopNav } from './DetectiveTopNav';
 import { DetectiveDashboardView } from './DetectiveDashboardView';
 import { DetectiveCasesAndDirectivesView } from './DetectiveCasesAndDirectivesView';
-import { DetectiveNotificationsView } from './DetectiveNotificationsView';
 import { DetectiveProfileView } from './DetectiveProfileView';
 import { DetectiveCaseWorkspaceModal } from './DetectiveCaseWorkspaceModal';
 
@@ -23,7 +22,6 @@ interface DetectivePageProps {
 
 export const DetectivePage: React.FC<DetectivePageProps> = ({ user, onSignOut }) => {
   const [activeTab, setActiveTab] = useState<DetectiveNavTab>('dashboard');
-  const [casesSubTab, setCasesSubTab] = useState<'cases' | 'directives'>('cases');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Detective State
@@ -89,7 +87,6 @@ export const DetectivePage: React.FC<DetectivePageProps> = ({ user, onSignOut })
       setSelectedCaseForWorkspace(found);
       setWorkspaceInitialTab(initialTab);
     } else {
-      setCasesSubTab('cases');
       setActiveTab('cases');
     }
   };
@@ -109,8 +106,7 @@ export const DetectivePage: React.FC<DetectivePageProps> = ({ user, onSignOut })
     refreshDetectiveData();
   };
 
-  const handleNavigateToCases = (subTab: 'cases' | 'directives' = 'cases') => {
-    setCasesSubTab(subTab);
+  const handleNavigateToCases = () => {
     setActiveTab('cases');
   };
 
@@ -124,18 +120,11 @@ export const DetectivePage: React.FC<DetectivePageProps> = ({ user, onSignOut })
         </div>
       )}
 
-      {/* Top Header Bar */}
+      {/* Top Header Bar with Live Bell */}
       <DetectiveTopNav
         user={user}
         activeTab={activeTab}
-        onNavigate={(tab) => {
-          if (tab === 'instructions') {
-            setCasesSubTab('directives');
-            setActiveTab('cases');
-          } else {
-            setActiveTab(tab);
-          }
-        }}
+        onNavigate={(tab) => setActiveTab(tab)}
         onSignOut={onSignOut}
         unreadCount={unreadNotificationsCount}
         notifications={notifications}
@@ -153,12 +142,7 @@ export const DetectivePage: React.FC<DetectivePageProps> = ({ user, onSignOut })
             <DetectiveSidebar
               activeTab={activeTab}
               onSelectTab={(tab) => {
-                if (tab === 'instructions') {
-                  setCasesSubTab('directives');
-                  setActiveTab('cases');
-                } else {
-                  setActiveTab(tab);
-                }
+                setActiveTab(tab);
                 setIsMobileMenuOpen(false);
               }}
               casesCount={assignedCases.length}
@@ -178,14 +162,7 @@ export const DetectivePage: React.FC<DetectivePageProps> = ({ user, onSignOut })
         <div className="hidden md:block shrink-0">
           <DetectiveSidebar
             activeTab={activeTab}
-            onSelectTab={(tab) => {
-              if (tab === 'instructions') {
-                setCasesSubTab('directives');
-                setActiveTab('cases');
-              } else {
-                setActiveTab(tab);
-              }
-            }}
+            onSelectTab={(tab) => setActiveTab(tab)}
             casesCount={assignedCases.length}
             outstandingInstructionsCount={outstandingInstructionsCount}
             onSignOut={onSignOut}
@@ -201,25 +178,14 @@ export const DetectivePage: React.FC<DetectivePageProps> = ({ user, onSignOut })
               instructions={allInstructions}
               onOpenCase={handleOpenCase}
               onNavigateToCases={handleNavigateToCases}
-              onNavigateToInstructions={() => handleNavigateToCases('directives')}
+              onNavigateToInstructions={() => setActiveTab('cases')}
             />
           )}
 
-          {(activeTab === 'cases' || activeTab === 'instructions') && (
+          {activeTab === 'cases' && (
             <DetectiveCasesAndDirectivesView
               cases={assignedCases}
               instructions={allInstructions}
-              onOpenCase={handleOpenCase}
-              initialSubTab={activeTab === 'instructions' ? 'directives' : casesSubTab}
-            />
-          )}
-
-          {activeTab === 'notifications' && (
-            <DetectiveNotificationsView
-              notifications={notifications}
-              cases={assignedCases}
-              onMarkRead={handleMarkNotificationRead}
-              onMarkAllRead={handleMarkAllNotificationsRead}
               onOpenCase={handleOpenCase}
             />
           )}
@@ -258,6 +224,7 @@ export const DetectivePage: React.FC<DetectivePageProps> = ({ user, onSignOut })
           }}
         />
       )}
+
     </div>
   );
 };

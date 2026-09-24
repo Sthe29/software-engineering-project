@@ -15,6 +15,7 @@ import { CommanderDashboardView } from './CommanderDashboardView';
 import { CommanderCasesView } from './CommanderCasesView';
 import { CommanderDetectivesView } from './CommanderDetectivesView';
 import { CommanderComplaintsView } from './CommanderComplaintsView';
+import { CommanderDetectivesAndComplaintsView } from './CommanderDetectivesAndComplaintsView';
 import { CommanderNotificationsView } from './CommanderNotificationsView';
 import { CommanderProfileView } from './CommanderProfileView';
 import { CommanderCaseWorkspaceModal } from './CommanderCaseWorkspaceModal';
@@ -254,22 +255,17 @@ export const CommanderPage: React.FC<CommanderPageProps> = ({
             />
           )}
 
-          {/* VIEW: DETECTIVES */}
-          {activeTab === 'detectives' && (
-            <CommanderDetectivesView
-              detectivesWorkload={detectivesWorkload}
-              cases={cases}
-              onOpenCase={handleOpenCaseWorkspace}
-              onFilterCasesByDetective={handleFilterCasesByDetective}
-            />
-          )}
-
-          {/* VIEW: COMPLAINTS */}
-          {activeTab === 'complaints' && (
-            <CommanderComplaintsView
+          {/* VIEW: COMBINED DETECTIVES & COMPLAINTS */}
+          {(activeTab === 'detectives-complaints' || activeTab === 'detectives' || activeTab === 'complaints') && (
+            <CommanderDetectivesAndComplaintsView
               commander={user}
+              detectivesWorkload={detectivesWorkload}
               complaints={complaints}
+              cases={cases}
+              initialSubTab={activeTab === 'complaints' ? 'complaints' : 'detectives'}
+              onOpenCase={handleOpenCaseWorkspace}
               onOpenCaseByNumber={handleOpenCaseByNumber}
+              onFilterCasesByDetective={handleFilterCasesByDetective}
               onRefreshComplaints={() => refreshAllData(false)}
             />
           )}
